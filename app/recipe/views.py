@@ -12,8 +12,8 @@ from recipe import serializers
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """View for manage recipe APIs."""
-
-    serializer_class = serializers.RecipeSerializer
+    # Mostly we'll use the detailed version so we default to that
+    serializer_class = serializers.RecipeDetailSerializer
 
     # queryset represents the objs available for this viewset
     # in this case, bc its a model viewset, it expects a model
@@ -27,3 +27,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retrieve recipes for authenticated user ONLY."""
         return self.queryset.filter(user=self.request.user).order_by('-id')
+
+    def get_serializer_class(self):
+        """Return the serializer class for request."""
+
+        if self.action == 'list':
+            return serializers.RecipeSerializer
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        """Create a new recipe."""
+
+        serializer.save(user=self.request.user)
